@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Crochet Mania Manager</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f5f3f7;color:#241f2b}
+header{background:#241f2b;color:white;padding:20px}.wrap{max-width:1100px;margin:auto}
+header h1{margin:0;font-size:25px}header p{margin:5px 0 0;opacity:.8}
+nav{display:flex;gap:8px;overflow:auto;background:white;padding:10px;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:2}
+nav button{border:0;background:#eee;padding:10px 14px;border-radius:9px;white-space:nowrap;cursor:pointer}
+nav button.active{background:#241f2b;color:#fff}
+main{padding:20px 0}.page{display:none}.page.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.card{background:white;border:1px solid #e5e0e8;border-radius:14px;padding:16px;box-shadow:0 2px 8px #00000008}
+.metric{font-size:28px;font-weight:800}.muted{color:#777;font-size:13px}
+.progress{height:9px;background:#e7e4e9;border-radius:99px;overflow:hidden}.progress>div{height:100%;background:#6d4aff}
+table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden}th,td{padding:11px;border-bottom:1px solid #eee;text-align:left;font-size:14px}
+input,select{padding:10px;border:1px solid #d5d0d9;border-radius:8px;width:100%;background:white}
+button.primary{background:#6d4aff;color:white;border:0;padding:10px 14px;border-radius:8px;cursor:pointer}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:12px 0}.form button{align-self:end}
+.badge{padding:4px 8px;border-radius:99px;font-size:12px;background:#eee}.done{background:#dff5e5}.late{background:#ffe1e1}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.smallbtn{border:0;background:#eee;padding:6px 9px;border-radius:7px;cursor:pointer}
+.notice{padding:12px;border-radius:10px;background:#f0ebff;margin-bottom:14px}
+@media(max-width:600px){header{padding:16px}main{padding:14px}.card{padding:13px}th,td{font-size:12px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>🧶 Crochet Mania Manager</h1><p>Organisation du lancement → événement des 4 & 5 décembre</p></div></header>
+<nav id="nav" class="wrap">
+<button data-page="dashboard">📊 Tableau de bord</button>
+<button data-page="tasks">✅ Tâches</button>
+<button data-page="contacts">🤝 Contacts</button>
+<button data-page="participants">🏫 Participants</button>
+<button data-page="budget">💰 Budget</button>
+<button data-page="comms">📢 Communication</button>
+</nav>
+<main class="wrap">
+<section id="dashboard" class="page">
+<div class="notice"><b>Prochaine étape :</b> lancement officiel le 30 septembre. Utilise cette application comme centre de contrôle du projet.</div>
+<div class="grid" id="metrics"></div>
+<div class="card" style="margin-top:14px"><h3>Progression du projet</h3><div class="progress"><div id="pbar"></div></div><p id="ptext" class="muted"></p></div>
+<div class="card" style="margin-top:14px"><h3>Prochaines échéances</h3><div id="upcoming"></div></div>
+</section>
+
+<section id="tasks" class="page">
+<div class="card"><h2>✅ Tâches</h2>
+<div class="form"><input id="taskName" placeholder="Nouvelle tâche"><input id="taskDate" type="date"><input id="taskOwner" placeholder="Responsable"><button class="primary" onclick="addTask()">Ajouter</button></div>
+<div style="overflow:auto"><table><thead><tr><th>✓</th><th>Tâche</th><th>Échéance</th><th>Responsable</th><th></th></tr></thead><tbody id="taskRows"></tbody></table></div></div>
+</section>
+
+<section id="contacts" class="page">
+<div class="card"><h2>🤝 Sponsors & partenaires</h2>
+<div class="form"><input id="cName" placeholder="Nom / entreprise"><input id="cType" placeholder="Type (sponsor, média...)"><input id="cStatus" placeholder="Statut"><input id="cValue" type="number" placeholder="Montant promis (Gdes)"><button class="primary" onclick="addContact()">Ajouter</button></div>
+<div style="overflow:auto"><table><thead><tr><th>Nom</th><th>Type</th><th>Statut</th><th>Montant</th><th></th></tr></thead><tbody id="contactRows"></tbody></table></div></div>
+</section>
+
+<section id="participants" class="page">
+<div class="card"><h2>🏫 Participants</h2>
+<div class="form"><input id="partName" placeholder="Nom"><input id="partType" placeholder="École, artiste, exposant..."><input id="partStatus" placeholder="À contacter / confirmé"><button class="primary" onclick="addParticipant()">Ajouter</button></div>
+<div style="overflow:auto"><table><thead><tr><th>Nom</th><th>Type</th><th>Statut</th><th></th></tr></thead><tbody id="partRows"></tbody></table></div></div>
+</section>
+
+<section id="budget" class="page">
+<div class="grid" id="budgetMetrics"></div>
+<div class="card" style="margin-top:14px"><h2>💰 Budget</h2>
+<div class="form"><input id="bLabel" placeholder="Dépense / recette"><select id="bType"><option value="expense">Dépense</option><option value="income">Recette</option></select><input id="bAmount" type="number" placeholder="Montant Gdes"><button class="primary" onclick="addBudget()">Ajouter</button></div>
+<div style="overflow:auto"><table><thead><tr><th>Libellé</th><th>Type</th><th>Montant</th><th></th></tr></thead><tbody id="budgetRows"></tbody></table></div></div>
+</section>
+
+<section id="comms" class="page">
+<div class="card"><h2>📢 Calendrier de communication</h2>
+<div class="form"><input id="comDate" type="date"><input id="comChannel" placeholder="Instagram, WhatsApp..."><input id="comContent" placeholder="Contenu / publication"><button class="primary" onclick="addCom()">Ajouter</button></div>
+<div style="overflow:auto"><table><thead><tr><th>Date</th><th>Canal</th><th>Contenu</th><th></th></tr></thead><tbody id="comRows"></tbody></table></div></div>
+</section>
+</main>
+<script>
+const KEY='cm_manager_v1';
+const seed={
+tasks:[
+["Finaliser le concept et le programme prévisionnel","2026-09-24","Direction",false],
+["Finaliser le dossier sponsors","2026-09-25","Sponsoring",false],
+["Finaliser identité visuelle et affiche","2026-09-26","Communication",false],
+["Préparer la liste sponsors, écoles, artistes et médias","2026-09-27","Coordination",false],
+["Préparer teaser et publications du lancement","2026-09-28","Communication",false],
+["Répétition générale du lancement","2026-09-29","Toute l'équipe",false],
+["Lancement officiel de Crochet Mania","2026-09-30","Toute l'équipe",false],
+["Confirmer le lieu de l'événement","2026-10-15","Logistique",false],
+["Première vague de contacts sponsors","2026-10-15","Sponsoring",false],
+["Ouvrir les inscriptions participants","2026-10-18","Coordination",false],
+["Lancer la campagne billetterie","2026-11-01","Communication",false],
+["Finaliser le programme","2026-11-22","Direction",false],
+["Installation","2026-12-03","Logistique",false],
+["Jour 1","2026-12-04","Toute l'équipe",false],
+["Jour 2 + clôture","2026-12-05","Toute l'équipe",false]
+].map((x,i)=>({id:i+1,name:x[0],date:x[1],owner:x[2],done:x[3]})),
+contacts:[],participants:[],budget:[],comms:[]
+};
+let data=JSON.parse(localStorage.getItem(KEY)||'null')||seed;
+function save(){localStorage.setItem(KEY,JSON.stringify(data));renderAll()}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(b.dataset.page).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active')});
+document.querySelector('nav button').click();
+function addTask(){let n=taskName.value.trim();if(!n)return;data.tasks.push({id:Date.now(),name:n,date:taskDate.value,owner:taskOwner.value,done:false});taskName.value='';taskOwner.value='';save()}
+function toggleTask(id){let t=data.tasks.find(x=>x.id===id);t.done=!t.done;save()}
+function del(arr,id){data[arr]=data[arr].filter(x=>x.id!==id);save()}
+function addContact(){if(!cName.value.trim())return;data.contacts.push({id:Date.now(),name:cName.value,type:cType.value,status:cStatus.value,value:+cValue.value||0});[cName,cType,cStatus,cValue].forEach(x=>x.value='');save()}
+function addParticipant(){if(!partName.value.trim())return;data.participants.push({id:Date.now(),name:partName.value,type:partType.value,status:partStatus.value});[partName,partType,partStatus].forEach(x=>x.value='');save()}
+function addBudget(){if(!bLabel.value.trim())return;data.budget.push({id:Date.now(),label:bLabel.value,type:bType.value,amount:+bAmount.value||0});bLabel.value='';bAmount.value='';save()}
+function addCom(){if(!comContent.value.trim())return;data.comms.push({id:Date.now(),date:comDate.value,channel:comChannel.value,content:comContent.value});[comDate,comChannel,comContent].forEach(x=>x.value='');save()}
+function renderAll(){
+taskRows.innerHTML=data.tasks.map(t=>`<tr><td><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${t.id})"></td><td>${esc(t.name)}</td><td>${t.date||'-'}</td><td>${esc(t.owner)}</td><td><button class="smallbtn" onclick="del('tasks',${t.id})">✕</button></td></tr>`).join('');
+contactRows.innerHTML=data.contacts.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.type)}</td><td><span class="badge">${esc(x.status)}</span></td><td>${x.value.toLocaleString()} Gdes</td><td><button class="smallbtn" onclick="del('contacts',${x.id})">✕</button></td></tr>`).join('');
+partRows.innerHTML=data.participants.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.type)}</td><td>${esc(x.status)}</td><td><button class="smallbtn" onclick="del('participants',${x.id})">✕</button></td></tr>`).join('');
+budgetRows.innerHTML=data.budget.map(x=>`<tr><td>${esc(x.label)}</td><td>${x.type==='income'?'Recette':'Dépense'}</td><td>${x.amount.toLocaleString()} Gdes</td><td><button class="smallbtn" onclick="del('budget',${x.id})">✕</button></td></tr>`).join('');
+comRows.innerHTML=data.comms.sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(x=>`<tr><td>${x.date||'-'}</td><td>${esc(x.channel)}</td><td>${esc(x.content)}</td><td><button class="smallbtn" onclick="del('comms',${x.id})">✕</button></td></tr>`).join('');
+let done=data.tasks.filter(x=>x.done).length, total=data.tasks.length, pct=total?Math.round(done/total*100):0;
+pbar.style.width=pct+'%';ptext.textContent=`${done} tâche(s) terminée(s) sur ${total} — ${pct}%`;
+metrics.innerHTML=`<div class="card"><div class="metric">${total}</div><div class="muted">Tâches</div></div><div class="card"><div class="metric">${data.contacts.length}</div><div class="muted">Contacts sponsors/partenaires</div></div><div class="card"><div class="metric">${data.participants.length}</div><div class="muted">Participants</div></div><div class="card"><div class="metric">${data.comms.length}</div><div class="muted">Publications planifiées</div></div>`;
+let inc=data.budget.filter(x=>x.type==='income').reduce((a,x)=>a+x.amount,0), exp=data.budget.filter(x=>x.type==='expense').reduce((a,x)=>a+x.amount,0);
+budgetMetrics.innerHTML=`<div class="card"><div class="metric">${inc.toLocaleString()}</div><div class="muted">Recettes (Gdes)</div></div><div class="card"><div class="metric">${exp.toLocaleString()}</div><div class="muted">Dépenses (Gdes)</div></div><div class="card"><div class="metric">${(inc-exp).toLocaleString()}</div><div class="muted">Solde (Gdes)</div></div>`;
+let upcoming=data.tasks.filter(x=>!x.done).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,6);
+document.getElementById('upcoming').innerHTML=upcoming.map(x=>`<div class="row" style="padding:9px 0;border-bottom:1px solid #eee"><span>${esc(x.name)}</span><b>${x.date}</b></div>`).join('')||'<p class="muted">Aucune échéance.</p>';
+}
+renderAll();
+</script>
+</body>
+</html>
